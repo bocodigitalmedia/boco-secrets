@@ -1,0 +1,36 @@
+{
+  "name": "boco-secrets",
+  "version": "0.1.0",
+  "description": "Secrets storage for your app",
+  "main": "index.js",
+  "scripts": {
+    "build": "rm -rf build && mkdir build && ./node_modules/.bin/coffee -cm -o build source",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bocodigitalmedia/boco-secrets.git"
+  },
+  "keywords": [
+    "secrets",
+    "encryption",
+    "configuration",
+    "encrypted"
+  ],
+  "author": "Christian Bradley <christianbradley@gmail.com> (https://github.com/christianbradley)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bocodigitalmedia/boco-secrets/issues"
+  },
+  "homepage": "https://github.com/bocodigitalmedia/boco-secrets#readme",
+  "devDependencies": {
+    "async": "^2.1.2",
+    "coffee-script": "^1.11.1"
+  },
+  "dependencies": {
+    "boco-encryption": "^0.1.0",
+    "boco-file-store": "^0.1.0",
+    "boco-mutex": "^0.1.1",
+    "json-ptr": "^1.0.1"
+  }
+}
