@@ -98,11 +98,14 @@ configure = (props) ->
           return done error if error?
           return done null, value
 
+  CLI = require './cli'
+
   {
     configure
     dependencies
     Dependencies
     Secrets
+    CLI
   }
 
 module.exports = configure()

@@ -32,5 +32,8 @@
     "boco-file-store": "^0.1.0",
     "boco-mutex": "^0.1.1",
     "json-ptr": "^1.0.1"
+  },
+  "bin": {
+    "boco-secrets": "./cli.js"
   }
 }

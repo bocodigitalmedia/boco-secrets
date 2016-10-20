@@ -50,7 +50,7 @@
   })();
 
   configure = function(props) {
-    var Encryption, FileStore, JSON, JsonPointer, LockManager, Secrets, dependencies, ref;
+    var CLI, Encryption, FileStore, JSON, JsonPointer, LockManager, Secrets, dependencies, ref;
     ref = dependencies = new Dependencies(props), JSON = ref.JSON, JsonPointer = ref.JsonPointer, LockManager = ref.LockManager, FileStore = ref.FileStore, Encryption = ref.Encryption;
     Secrets = (function() {
       Secrets.prototype.lockManager = null;
@@ -191,11 +191,13 @@
       return Secrets;
 
     })();
+    CLI = require('./cli');
     return {
       configure: configure,
       dependencies: dependencies,
       Dependencies: Dependencies,
-      Secrets: Secrets
+      Secrets: Secrets,
+      CLI: CLI
     };
   };
 

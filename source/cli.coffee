@@ -97,14 +97,39 @@ configure = (props) ->
         args = args.slice 1
         @exec secrets, command, args, options
 
+    defaultSecretsFactory: (options, done) ->
+      try
+        secretKey = options.secret ? @process.env.BOCO_ENCRYPTION_SECRET_KEY
+        algorithm = options.algorithm ? @process.env.BOCO_ENCRYPTION_ALGORITHM
+        basePath = options.basepath ? @process.env.BOCO_SECRETS_BASE_PATH
+        encryption = require('boco-encryption').cipherIv {secretKey, algorithm}
+        fileStore = require('boco-file-store').fileSystem {basePath}
+        secrets = new Secrets {encryption, fileStore}
+      catch error
+      finally
+        return done error if error?
+        return done null, secrets
+
     getSecrets: (options, done) ->
-      secretKey = options.secret ? @process.env.BOCO_ENCRYPTION_SECRET_KEY
-      algorithm = options.algorithm ? @process.env.BOCO_ENCRYPTION_ALGORITHM
-      basePath = options.basepath ? @process.env.BOCO_SECRETS_BASE_PATH
-      encryption = require('boco-encryption').cipherIv {secretKey, algorithm}
-      fileStore = require('boco-file-store').fileSystem {basePath}
-      secrets = new Secrets {encryption}
-      done null, secrets
+      factory = do =>
+
+        otherOptions = (key for own key, val of options when key isnt 'factory')
+        if options.factory is false or otherOptions.length
+          return @defaultSecretsFactory.bind @, options
+
+        factoryPath = options.factory ? './boco-secrets-factory.js'
+
+        factory = do =>
+          try
+            factory = require Path.resolve(factoryPath)
+          catch error
+          finally
+            return done error if error? and error.code isnt 'MODULE_NOT_FOUND'
+            return done Error("Invalid factory.") if factory? and typeof factory isnt 'function'
+            return @defaultSecretsFactory.bind @, options unless factory?
+          return factory
+
+      factory done
 
     getHelpMessage: ->
       """
@@ -127,13 +152,33 @@ configure = (props) ->
       options:
 
         --algorithm <encryption-algorithm>
-          defaults to $BOCO_ENCRYPTION_ALGORITHM or 'aes-256-ctr'
+          Specify the cipher algorithm for encryption.
+          Defaults to $BOCO_ENCRYPTION_ALGORITHM or 'aes-256-ctr'.
 
         --secret <encryption-secret-key>
-          defaults to $BOCO_ENCRYPTION_SECRET_KEY
+          Specify the secret key used for encryption.
+          Defaults to $BOCO_ENCRYPTION_SECRET_KEY
 
         --basepath <file-store-base-path>
-          defaults to $BOCO_SECRETS_BASE_PATH or '.'
+          Specify the base path used to store secret sources.
+          Defaults to $BOCO_SECRETS_BASE_PATH or '.'.
+
+        --factory <path-to-factory-js>
+          Specify an alternative path to the factory.js file.
+          Defaults to './boco-secrets-factory.js'
+
+        --no-factory
+          Ignore any factory.js settings and use options only.
+
+      factory:
+
+        For advanced configuration options, you can create a factory.js
+        file that exports a single async function, and calls back with
+        a configured instance of `BocoSecrets.Secrets` to use for all
+        CLI operations.
+
+        Setting any of the following options will ignore the factory
+        entirely: --algorithm, --secret, --basepath.
 
       """
 
@@ -160,4 +205,3 @@ configure = (props) ->
   }
 
 module.exports = configure()
-module.exports.main() unless module?.parent?
